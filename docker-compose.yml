@@ -9,6 +9,9 @@ services:
         password: password
         email: admin@admin.com
     image: server
+    ports:
+    - 8000:8000
+ 
   
 
   jxwaf:
@@ -16,3 +19,13 @@ services:
       context: jxwaf
       dockerfile: Dockerfile
     image: jxwaf
+     ports:
+    - 80:80
+    - 443:443
+
+  logstash:
+    build:
+      context: logstash
+      dockerfile: Dockerfile
+    image: logstash
+    
