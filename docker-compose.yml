@@ -19,7 +19,7 @@ services:
       context: jxwaf
       dockerfile: Dockerfile
     image: jxwaf
-    ports: 
+    ports:
     - 80:80
     - 443:443
 
