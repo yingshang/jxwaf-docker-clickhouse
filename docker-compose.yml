@@ -1,18 +1,47 @@
-version: '3'
+version: '2'
 services:
   server:
     build:
       context: server
       dockerfile: Dockerfile
-      args:
-        username: admin
-        password: password
-        email: admin@admin.com
     image: server
+    networks:
+      extnetwork:
+        ipv4_address: 172.20.0.100
     ports:
-    - 8000:8000
- 
-  
+      - 8000:80
+    environment:
+      MYSQL_USER:
+      MYSQL_PASSWORD:
+      SUPER_USER:
+      SUPER_PASSWORD:
+      SUPER_EMAIL:
+      USER_API_KEY:
+      USER_NAME:
+      USER_PASSWORD:
+      USER_API_PASSWORD:
+
+
+
+  db:
+    image: mysql:5.7
+    networks:
+      extnetwork:
+        ipv4_address: 172.20.0.200
+    container_name: db
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_DATABASE: jxwaf
+      MYSQL_USER: 
+      MYSQL_PASSWORD:
+    user: root
+    privileged: true
+
 
   jxwaf:
     build:
@@ -20,23 +49,64 @@ services:
       dockerfile: Dockerfile
     image: jxwaf
     ports:
-    - 80:80
-    - 443:443
+      - 80:80
+      - 443:443
+    environment:
+      USER_API_KEY:
+      USER_API_PASSWORD:
+
+    networks:
+      extnetwork:
+        ipv4_address: 172.20.0.41
 
   logstash:
     build:
       context: logstash
       dockerfile: Dockerfile
     image: logstash
-    
+    networks:
+      extnetwork:
+        ipv4_address: 172.20.0.31
+
+
   clickhouse:
     build:
       context: clickhouse
       dockerfile: Dockerfile
     image: clickhouse
     ports:
-    - 9000:9000
-    
+      - 9000:9000
+      - 8123:8123
+    volumes:
+      - ./data/clickhouse:/var/lib/clickhouse
+    user: root
+    privileged: true
 
-    
-    
+    networks:
+      extnetwork:
+        ipv4_address: 172.20.0.21
+
+
+  kafka:
+    build:
+      context: kafka
+      dockerfile: Dockerfile
+    image: kafka
+    networks:
+      extnetwork:
+        ipv4_address: 172.20.0.11
+
+
+  dvwa:
+    image: citizenstig/dvwa
+    networks:
+      extnetwork:
+        ipv4_address: 172.20.0.220
+
+networks:
+  extnetwork:
+    ipam:
+      driver: bright
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
